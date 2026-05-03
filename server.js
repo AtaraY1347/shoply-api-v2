@@ -5,18 +5,15 @@ const app = express();
 app.use(cors());
 
 // ============================================================
-//  Shoply API v2 - מבוסס APIs חיצוניים אמיתיים:
-//  1. Open Food Facts - מוצרים אמיתיים
-//  2. Open Prices - מחירים אמיתיים מסופרמרקטים
+//  Shoply API v2.1 - מבוסס APIs חיצוניים אמיתיים
+//  שיפורים: סינון מוצרים בלי שם בעברית/אנגלית בלבד,
+//           תרגום כמויות, חיפוש משופר
 // ============================================================
 
 const OFF_BASE_URL = "https://world.openfoodfacts.org";
 const PRICES_BASE_URL = "https://prices.openfoodfacts.org/api/v1";
-const USER_AGENT = "ShoplyApp/2.0";
+const USER_AGENT = "ShoplyApp/2.1";
 
-// ============================================================
-//  שמות הסופרים בעברית - בדיוק כמו בקוד המקורי
-// ============================================================
 const STORE_NAMES = {
   shufersal: "שופרסל",
   ramiLevy: "רמי לוי",
@@ -26,142 +23,172 @@ const STORE_NAMES = {
   tivTaam: "טיב טעם"
 };
 
-// ============================================================
-//  מיפוי חנויות זרות (מ-Open Prices) לסופרים בישראל
-// ============================================================
 const STORE_MAPPING = {
-  "lidl": "ramiLevy",
-  "aldi": "ramiLevy",
-  "netto": "ramiLevy",
-  "dia": "ramiLevy",
-  "carrefour": "carrefour",
-  "auchan": "carrefour",
-  "tesco": "shufersal",
-  "intermarche": "shufersal",
-  "leclerc": "shufersal",
-  "casino": "victory",
-  "monoprix": "victory",
-  "spar": "victory",
-  "asda": "yohananof",
-  "sainsburys": "yohananof",
-  "marks-and-spencer": "tivTaam",
-  "waitrose": "tivTaam",
-  "whole-foods": "tivTaam",
-  "biocoop": "tivTaam"
+  "lidl": "ramiLevy", "aldi": "ramiLevy", "netto": "ramiLevy", "dia": "ramiLevy",
+  "carrefour": "carrefour", "auchan": "carrefour",
+  "tesco": "shufersal", "intermarche": "shufersal", "leclerc": "shufersal",
+  "casino": "victory", "monoprix": "victory", "spar": "victory",
+  "asda": "yohananof", "sainsburys": "yohananof",
+  "marks-and-spencer": "tivTaam", "waitrose": "tivTaam",
+  "whole-foods": "tivTaam", "biocoop": "tivTaam"
 };
 
 // ============================================================
-//  קטגוריות OFF -> עברית
+//  קטגוריות - שמות מדויקים מ-Open Food Facts
+//  (חלק מהtags לא היו מדויקים בגרסה הקודמת)
 // ============================================================
 const CATEGORIES = [
-  { tag: "Eggs",                 he: "ביצים ודגנים" },
-  { tag: "Breakfast-cereals",    he: "ביצים ודגנים" },
-  { tag: "Pastas",               he: "פחמימות" },
-  { tag: "Rices",                he: "פחמימות" },
-  { tag: "Legumes",              he: "פחמימות" },
-  { tag: "Breads",               he: "פחמימות" },
-  { tag: "Vegetables",           he: "ירקות" },
-  { tag: "Fruits",               he: "פירות" },
-  { tag: "Meats",                he: "בשר ודגים" },
-  { tag: "Poultry",              he: "בשר ודגים" },
-  { tag: "Fishes",               he: "בשר ודגים" },
-  { tag: "Dairies",              he: "מוצרי חלב" },
-  { tag: "Cheeses",              he: "מוצרי חלב" },
-  { tag: "Yogurts",              he: "מוצרי חלב" },
-  { tag: "Beverages",            he: "שתייה" },
-  { tag: "Sodas",                he: "שתייה" },
-  { tag: "Juices",               he: "שתייה" },
-  { tag: "Snacks",               he: "חטיפים ומתוקים" },
-  { tag: "Chocolates",           he: "חטיפים ומתוקים" },
-  { tag: "Biscuits",             he: "חטיפים ומתוקים" },
-  { tag: "Ice-creams",           he: "חטיפים ומתוקים" },
-  { tag: "Sweet-spreads",        he: "חטיפים ומתוקים" },
-  { tag: "Candies",              he: "חטיפים ומתוקים" }
+  // ביצים ודגנים
+  { tag: "en:eggs",                    he: "ביצים ודגנים" },
+  { tag: "en:breakfast-cereals",       he: "ביצים ודגנים" },
+  // פחמימות
+  { tag: "en:pastas",                  he: "פחמימות" },
+  { tag: "en:rice",                    he: "פחמימות" },
+  { tag: "en:legumes",                 he: "פחמימות" },
+  { tag: "en:breads",                  he: "פחמימות" },
+  // ירקות ופירות
+  { tag: "en:vegetables",              he: "ירקות" },
+  { tag: "en:fresh-vegetables",        he: "ירקות" },
+  { tag: "en:fruits",                  he: "פירות" },
+  { tag: "en:fresh-fruits",            he: "פירות" },
+  // בשר ודגים
+  { tag: "en:meats",                   he: "בשר ודגים" },
+  { tag: "en:poultry",                 he: "בשר ודגים" },
+  { tag: "en:fishes",                  he: "בשר ודגים" },
+  { tag: "en:canned-fishes",           he: "בשר ודגים" },
+  // מוצרי חלב
+  { tag: "en:dairies",                 he: "מוצרי חלב" },
+  { tag: "en:cheeses",                 he: "מוצרי חלב" },
+  { tag: "en:yogurts",                 he: "מוצרי חלב" },
+  { tag: "en:milks",                   he: "מוצרי חלב" },
+  // שתייה
+  { tag: "en:beverages",               he: "שתייה" },
+  { tag: "en:waters",                  he: "שתייה" },
+  { tag: "en:sodas",                   he: "שתייה" },
+  { tag: "en:fruit-juices",            he: "שתייה" },
+  // חטיפים ומתוקים
+  { tag: "en:snacks",                  he: "חטיפים ומתוקים" },
+  { tag: "en:chocolates",              he: "חטיפים ומתוקים" },
+  { tag: "en:biscuits",                he: "חטיפים ומתוקים" },
+  { tag: "en:ice-creams",              he: "חטיפים ומתוקים" },
+  { tag: "en:sweet-spreads",           he: "חטיפים ומתוקים" },
+  { tag: "en:candies",                 he: "חטיפים ומתוקים" }
 ];
 
 const ALL_CATEGORIES_HE = [...new Set(CATEGORIES.map(c => c.he))];
 
 // ============================================================
-//  מילון תרגום אנגלית -> עברית
+//  מילון תרגום מורחב
 // ============================================================
 const TRANSLATIONS = {
+  // תארים
   "white": "לבן", "red": "אדום", "green": "ירוק", "yellow": "צהוב",
   "fresh": "טרי", "frozen": "קפוא", "organic": "אורגני",
   "natural": "טבעי", "sweet": "מתוק", "whole": "מלא",
+  "low": "דל", "fat": "שומן", "free": "ללא",
+  // ביצים ודגנים
   "egg": "ביצים", "eggs": "ביצים",
   "flour": "קמח", "wheat": "חיטה",
   "oats": "שיבולת שועל", "oat": "שיבולת שועל",
   "cereal": "דגני בוקר", "cereals": "דגני בוקר",
   "cornflakes": "קורנפלקס", "corn flakes": "קורנפלקס",
-  "granola": "גרנולה",
+  "granola": "גרנולה", "muesli": "מוזלי",
+  // פחמימות
   "rice": "אורז", "basmati": "בסמטי",
   "pasta": "פסטה", "spaghetti": "ספגטי", "penne": "פנה",
-  "fusilli": "פוסילי", "noodles": "אטריות",
+  "fusilli": "פוסילי", "noodles": "אטריות", "macaroni": "מקרוני",
   "couscous": "קוסקוס", "bulgur": "בורגול", "quinoa": "קינואה",
   "lentils": "עדשים", "chickpeas": "חומוס", "beans": "שעועית",
-  "bread": "לחם", "pita": "פיתה", "buns": "לחמניות",
+  "bread": "לחם", "pita": "פיתה", "buns": "לחמניות", "roll": "לחמנייה",
+  "tortilla": "טורטייה",
+  // ירקות
   "potato": "תפוח אדמה", "potatoes": "תפוח אדמה",
   "sweet potato": "בטטה",
   "onion": "בצל", "garlic": "שום",
   "tomato": "עגבנייה", "tomatoes": "עגבניות",
   "cherry tomato": "עגבניות שרי",
-  "cucumber": "מלפפון", "pepper": "פלפל",
-  "carrot": "גזר", "lettuce": "חסה",
+  "cucumber": "מלפפון", "pepper": "פלפל", "peppers": "פלפלים",
+  "carrot": "גזר", "carrots": "גזרים",
+  "lettuce": "חסה",
   "cabbage": "כרוב", "cauliflower": "כרובית", "broccoli": "ברוקולי",
   "zucchini": "קישוא", "eggplant": "חציל",
   "parsley": "פטרוזיליה", "coriander": "כוסברה", "mint": "נענע",
   "mushroom": "פטרייה", "mushrooms": "פטריות",
-  "corn": "תירס",
-  "apple": "תפוח", "banana": "בננה",
-  "orange": "תפוז", "clementine": "קלמנטינה",
-  "lemon": "לימון", "lime": "ליים",
+  "corn": "תירס", "spinach": "תרד",
+  // פירות
+  "apple": "תפוח", "apples": "תפוחים", "banana": "בננה", "bananas": "בננות",
+  "orange": "תפוז", "oranges": "תפוזים",
+  "clementine": "קלמנטינה", "lemon": "לימון", "lime": "ליים",
   "avocado": "אבוקדו", "grape": "ענבים", "grapes": "ענבים",
   "strawberry": "תות", "strawberries": "תות שדה",
   "watermelon": "אבטיח", "melon": "מלון", "pineapple": "אננס",
-  "pear": "אגס", "peach": "אפרסק", "nectarine": "נקטרינה",
-  "kiwi": "קיווי", "mango": "מנגו",
+  "pear": "אגס", "pears": "אגסים", "peach": "אפרסק", "peaches": "אפרסקים",
+  "nectarine": "נקטרינה", "kiwi": "קיווי", "mango": "מנגו",
   "blueberry": "אוכמנייה", "blueberries": "אוכמניות",
+  "raspberry": "פטל", "blackberry": "פטל שחור",
   "date": "תמר", "dates": "תמרים",
   "cherry": "דובדבן", "cherries": "דובדבנים",
+  // בשר ודגים
   "chicken": "עוף", "breast": "חזה", "thighs": "שוקיים",
   "wings": "כנפיים",
-  "beef": "בקר", "ground beef": "בקר טחון",
+  "beef": "בקר", "ground": "טחון", "ground beef": "בקר טחון",
   "entrecote": "אנטריקוט", "fillet": "פילה", "steak": "סטייק",
   "lamb": "כבש",
   "burger": "המבורגר", "hamburger": "המבורגר",
   "sausage": "נקניק", "sausages": "נקניקיות",
-  "salmon": "סלמון", "smoked salmon": "סלמון מעושן",
+  "salmon": "סלמון", "smoked": "מעושן",
   "tuna": "טונה", "tilapia": "אמנון", "fish": "דג",
-  "milk": "חלב", "soy milk": "חלב סויה", "almond milk": "חלב שקדים",
-  "cheese": "גבינה", "yellow cheese": "גבינה צהובה",
-  "white cheese": "גבינה לבנה",
+  // חלב
+  "milk": "חלב", "soy": "סויה", "almond": "שקדים",
+  "cheese": "גבינה",
   "cottage": "קוטג'", "feta": "פטה", "mozzarella": "מוצרלה",
   "gouda": "גאודה", "emmental": "אמנטל", "parmesan": "פרמזן",
-  "yogurt": "יוגורט", "greek yogurt": "יוגורט יווני",
+  "cheddar": "צ'דר", "yogurt": "יוגורט", "greek": "יווני",
   "butter": "חמאה", "margarine": "מרגרינה",
-  "cream": "שמנת", "sour cream": "שמנת חמוצה",
-  "water": "מים", "mineral water": "מים מינרלים",
+  "cream": "שמנת", "sour": "חמוצה",
+  // שתייה
+  "water": "מים", "mineral": "מינרליים",
   "coke": "קוקה קולה", "cola": "קולה", "coca-cola": "קוקה קולה",
   "sprite": "ספרייט", "fanta": "פאנטה", "pepsi": "פפסי",
-  "juice": "מיץ", "orange juice": "מיץ תפוזים",
-  "apple juice": "מיץ תפוחים",
-  "tea": "תה", "green tea": "תה ירוק", "black tea": "תה שחור",
-  "coffee": "קפה", "instant coffee": "קפה נמס",
+  "juice": "מיץ",
+  "tea": "תה", "coffee": "קפה", "instant": "נמס",
   "beer": "בירה", "wine": "יין",
-  "red wine": "יין אדום", "white wine": "יין לבן",
+  // חטיפים
   "chips": "צ'יפס", "doritos": "דוריטוס", "cheetos": "צ'יטוס",
   "popcorn": "פופקורן",
-  "chocolate": "שוקולד", "milk chocolate": "שוקולד חלב",
-  "dark chocolate": "שוקולד מריר",
-  "candy": "סוכריות",
+  "chocolate": "שוקולד", "dark": "מריר",
+  "candy": "סוכריות", "candies": "סוכריות",
   "cookies": "עוגיות", "biscuits": "עוגיות",
   "wafer": "ופלים", "wafers": "ופלים",
-  "ice cream": "גלידה", "vanilla": "וניל"
+  "ice cream": "גלידה", "vanilla": "וניל",
+  "nutella": "נוטלה", "spread": "ממרח"
 };
 
 // ============================================================
-//  המרת מטבעות לשקלים
+//  תרגום יחידות מידה (g, ml, kg וכו')
 // ============================================================
+function translateQuantity(quantity) {
+  if (!quantity) return "יחידה";
+
+  let translated = String(quantity);
+
+  // מ-l ראשון (ארוך לפני קצר!)
+  translated = translated.replace(/(\d+\.?\d*)\s*ml\b/gi, "$1 מ\"ל");
+  translated = translated.replace(/(\d+\.?\d*)\s*kg\b/gi, "$1 ק\"ג");
+  translated = translated.replace(/(\d+\.?\d*)\s*g\b/gi, "$1 גרם");
+  translated = translated.replace(/(\d+\.?\d*)\s*l\b/gi, "$1 ליטר");
+  translated = translated.replace(/(\d+\.?\d*)\s*oz\b/gi, "$1 אונקיות");
+  translated = translated.replace(/(\d+\.?\d*)\s*lb\b/gi, "$1 פאונד");
+
+  // יחידות
+  translated = translated.replace(/\bunits?\b/gi, "יח'");
+  translated = translated.replace(/\bpieces?\b/gi, "יח'");
+  translated = translated.replace(/\bpcs?\b/gi, "יח'");
+  translated = translated.replace(/\bpack\b/gi, "מארז");
+
+  return translated.trim();
+}
+
 const CURRENCY_TO_ILS = { "EUR": 4.0, "USD": 3.7, "GBP": 4.7, "ILS": 1.0, "CHF": 4.2 };
 
 function convertToILS(price, currency) {
@@ -169,9 +196,6 @@ function convertToILS(price, currency) {
   return price * rate;
 }
 
-// ============================================================
-//  Cache פשוט
-// ============================================================
 const cache = new Map();
 const CACHE_TTL = 6 * 60 * 60 * 1000;
 
@@ -189,7 +213,20 @@ function setCached(key, value) {
 }
 
 // ============================================================
-//  פונקציית תרגום
+//  בדיקה שהשם הוא באנגלית בלבד (לא סינית/יפנית/ערבית/עברית)
+//  אם יש תווים שאינם אנגלית - מסננים את המוצר
+// ============================================================
+function isEnglishOnly(text) {
+  if (!text || text.length < 2) return false;
+  // מסננים אם יש תווים אסיאתיים, ערבית, עברית, רוסית
+  const nonLatinPattern = /[\u4e00-\u9fff\u3040-\u30ff\u0590-\u05ff\u0600-\u06ff\u0400-\u04ff]/;
+  if (nonLatinPattern.test(text)) return false;
+  // לפחות צריכה להיות אות אנגלית אחת
+  return /[a-zA-Z]/.test(text);
+}
+
+// ============================================================
+//  פונקציית תרגום משופרת
 // ============================================================
 function translateToHebrew(text) {
   if (!text) return "";
@@ -197,8 +234,9 @@ function translateToHebrew(text) {
 
   if (TRANSLATIONS[lower]) return TRANSLATIONS[lower];
 
-  const words = lower.split(/[\s,.\-_/]+/).filter(Boolean);
+  const words = lower.split(/[\s,.\-_/()]+/).filter(Boolean);
 
+  // התאמה לצירופי 2-3 מילים
   for (let len = Math.min(3, words.length); len >= 2; len--) {
     for (let i = 0; i <= words.length - len; i++) {
       const phrase = words.slice(i, i + len).join(" ");
@@ -210,30 +248,31 @@ function translateToHebrew(text) {
     }
   }
 
+  // תרגום מילה-מילה
   const translated = words.map(w => TRANSLATIONS[w] || "").filter(Boolean);
-  if (translated.length === 0) return text;
+  if (translated.length === 0) return "";
   if (translated.length === 1) return translated[0];
 
   return [translated[translated.length - 1], ...translated.slice(0, -1)].join(" ");
 }
 
-// ============================================================
-//  זיהוי קטגוריה
-// ============================================================
 function detectHebrewCategory(offProduct) {
   const tags = (offProduct.categories_tags || []).map(t => t.toLowerCase());
   for (const cat of CATEGORIES) {
-    const tag = cat.tag.toLowerCase().replace(/-/g, "");
-    if (tags.some(t => t.replace(/-/g, "").includes(tag))) {
+    if (tags.includes(cat.tag)) {
+      return cat.he;
+    }
+  }
+  // נסיון שני - חיפוש חלקי
+  for (const cat of CATEGORIES) {
+    const tagShort = cat.tag.replace("en:", "").replace(/-/g, "");
+    if (tags.some(t => t.replace("en:", "").replace(/-/g, "").includes(tagShort))) {
       return cat.he;
     }
   }
   return "כללי";
 }
 
-// ============================================================
-//  Fetch עזר
-// ============================================================
 async function fetchJson(url) {
   const cached = getCached(url);
   if (cached) return cached;
@@ -251,9 +290,6 @@ async function fetchJson(url) {
   return data;
 }
 
-// ============================================================
-//  שליפת מחירים אמיתיים
-// ============================================================
 async function fetchRealPrices(barcode) {
   if (!barcode) return [];
   try {
@@ -276,9 +312,6 @@ function extractStoreName(priceObj) {
   return "";
 }
 
-// ============================================================
-//  hash code
-// ============================================================
 function hashCode(str) {
   let h = 0;
   for (let i = 0; i < str.length; i++) {
@@ -288,9 +321,6 @@ function hashCode(str) {
   return Math.abs(h);
 }
 
-// ============================================================
-//  מחיר בסיס לפי קטגוריה
-// ============================================================
 function baselinePrice(productId, categoryHe) {
   const seed = hashCode(productId);
   switch (categoryHe) {
@@ -306,9 +336,6 @@ function baselinePrice(productId, categoryHe) {
   }
 }
 
-// ============================================================
-//  בניית prices
-// ============================================================
 function buildPrices(realPrices, productId, categoryHe) {
   const prices = {};
 
@@ -342,32 +369,43 @@ function buildPrices(realPrices, productId, categoryHe) {
 
 // ============================================================
 //  המרת מוצר OFF -> פורמט פנימי
+//  שיפור: סינון מוצרים שלא הצלחנו לתרגם / יש בהם סינית
 // ============================================================
 async function offToProduct(offProduct) {
-  const englishName =
-    offProduct.product_name_en ||
-    offProduct.product_name ||
-    offProduct.generic_name_en ||
-    offProduct.generic_name || "";
+  // נסיון להשיג שם באנגלית בלבד
+  let englishName = "";
+  const candidates = [
+    offProduct.product_name_en,
+    offProduct.product_name,
+    offProduct.generic_name_en,
+    offProduct.generic_name
+  ];
+  for (const name of candidates) {
+    if (name && isEnglishOnly(name)) {
+      englishName = name;
+      break;
+    }
+  }
 
+  // אם לא מצאנו שם באנגלית - מדלגים על המוצר
   if (!englishName) return null;
 
-  let title = translateToHebrew(englishName).trim().slice(0, 60);
-  if (!title) title = englishName.slice(0, 60);
+  // תרגום
+  const translatedTitle = translateToHebrew(englishName).trim().slice(0, 60);
+
+  // אם התרגום לא הצליח - מדלגים (לא רוצים אנגלית באפליקציה)
+  if (!translatedTitle) return null;
 
   const category = detectHebrewCategory(offProduct);
-  const quantity = offProduct.quantity || "יחידה";
+  const quantity = translateQuantity(offProduct.quantity);
   const id = String(offProduct.code || hashCode(englishName));
 
   const realPrices = await fetchRealPrices(id);
   const prices = buildPrices(realPrices, id, category);
 
-  return { id, title, category, quantity, prices };
+  return { id, title: translatedTitle, category, quantity, prices };
 }
 
-// ============================================================
-//  המרה לפורמט שהאפליקציה מצפה
-// ============================================================
 function toApiFormat(product) {
   return {
     id: product.id,
@@ -390,26 +428,23 @@ function toApiFormat(product) {
 }
 
 // ============================================================
-//  שליפת מוצרים לפי קטגוריה
+//  שליפה לפי קטגוריה - גדול יותר כדי לקבל מספיק מוצרים אחרי סינון
 // ============================================================
-async function fetchByCategory(offCategoryTag, pageSize = 8) {
-  const fields = "code,product_name,product_name_en,generic_name,quantity,categories_tags";
-  const url = `${OFF_BASE_URL}/api/v2/search?categories_tags_en=${encodeURIComponent(offCategoryTag)}` +
+async function fetchByCategory(offCategoryTag, pageSize = 30) {
+  const fields = "code,product_name,product_name_en,generic_name,generic_name_en,quantity,categories_tags";
+  // משתמשים ב-tag שמתחיל ב-en: לדיוק
+  const tagOnly = offCategoryTag.replace("en:", "");
+  const url = `${OFF_BASE_URL}/api/v2/search?categories_tags_en=${encodeURIComponent(tagOnly)}` +
               `&fields=${fields}&page_size=${pageSize}&sort_by=popularity_key`;
   const data = await fetchJson(url);
 
   const items = await Promise.all(
-    (data.products || [])
-      .filter(p => p.product_name_en || p.product_name)
-      .map(p => offToProduct(p).catch(() => null))
+    (data.products || []).map(p => offToProduct(p).catch(() => null))
   );
 
   return items.filter(p => p !== null);
 }
 
-// ============================================================
-//  שליפת כל המוצרים
-// ============================================================
 async function fetchAllProducts() {
   const cached = getCached("ALL");
   if (cached) return cached;
@@ -419,9 +454,9 @@ async function fetchAllProducts() {
 
   for (const cat of CATEGORIES) {
     try {
-      const products = await fetchByCategory(cat.tag, 8);
+      const products = await fetchByCategory(cat.tag, 25);
       for (const p of products) {
-        if (!seen.has(p.id)) {
+        if (!seen.has(p.id) && p.title) {
           seen.add(p.id);
           if (p.category === "כללי") p.category = cat.he;
           all.push(p);
@@ -443,7 +478,7 @@ async function fetchAllProducts() {
 app.get("/", (req, res) => {
   res.json({
     name: "Shoply API",
-    version: "2.0.0",
+    version: "2.1.0",
     description: "Powered by Open Food Facts + Open Prices",
     sources: {
       products: "https://world.openfoodfacts.org/",
@@ -467,9 +502,20 @@ app.get("/products", async (req, res) => {
       products = products.filter(p => p.category === req.query.category);
     }
 
+    // ============================================================
+    //  חיפוש משופר - בעברית ובאנגלית
+    //  מחפשים גם בכותרת וגם בקטגוריה, וגם תמיכה בכמה מילים
+    // ============================================================
     if (req.query.search) {
-      const search = req.query.search.toLowerCase();
-      products = products.filter(p => p.title.toLowerCase().includes(search));
+      const search = req.query.search.toLowerCase().trim();
+      const searchWords = search.split(/\s+/);
+
+      products = products.filter(p => {
+        const title = (p.title || "").toLowerCase();
+        const category = (p.category || "").toLowerCase();
+        // התאמה אם כל מילה בחיפוש מופיעה בכותרת או בקטגוריה
+        return searchWords.every(w => title.includes(w) || category.includes(w));
+      });
     }
 
     res.json(products.map(toApiFormat));
@@ -482,7 +528,7 @@ app.get("/products", async (req, res) => {
 app.get("/products/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const fields = "code,product_name,product_name_en,generic_name,quantity,categories_tags";
+    const fields = "code,product_name,product_name_en,generic_name,generic_name_en,quantity,categories_tags";
     const url = `${OFF_BASE_URL}/api/v2/product/${encodeURIComponent(id)}?fields=${fields}`;
     const data = await fetchJson(url);
 
@@ -494,6 +540,9 @@ app.get("/products/:id", async (req, res) => {
     }
 
     const product = await offToProduct(data.product);
+    if (!product) {
+      return res.status(404).json({ error: "מוצר לא נמצא" });
+    }
     res.json(toApiFormat(product));
   } catch (err) {
     console.error("Error /products/:id:", err);
@@ -505,12 +554,9 @@ app.get("/categories", (req, res) => {
   res.json(ALL_CATEGORIES_HE);
 });
 
-// ============================================================
-//  Start
-// ============================================================
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`✓ Shoply API running on port ${PORT}`);
+  console.log(`✓ Shoply API v2.1 running on port ${PORT}`);
   console.log(`✓ Powered by Open Food Facts + Open Prices`);
 });
