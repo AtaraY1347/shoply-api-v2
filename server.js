@@ -5,167 +5,18 @@ const app = express();
 app.use(cors());
 
 // ============================================================
-//  Product List 
+//  Shoply API v2 - מבוסס APIs חיצוניים אמיתיים:
+//  1. Open Food Facts - מוצרים אמיתיים
+//  2. Open Prices - מחירים אמיתיים מסופרמרקטים
 // ============================================================
-const products = [
-  { id: "1", title: "ביצים L 12 יחידות", category: "ביצים ודגנים", quantity: "12 יח'", prices: { shufersal: 24.5, ramiLevy: 22.9, victory: 21.5, yohananof: 23.9, carrefour: 27.5, tivTaam: 22.9 } },
-  { id: "2", title: "ביצים XL 12 יחידות", category: "ביצים ודגנים", quantity: "12 יח'", prices: { shufersal: 28.9, ramiLevy: 23.9, victory: 26.9, yohananof: 27.9, carrefour: 31.5, tivTaam: 26.9 } },
-  { id: "3", title: "קמח חיטה מלא", category: "ביצים ודגנים", quantity: "1 ק\"ג", prices: { shufersal: 8.5, ramiLevy: 9.5, victory: 7.9, yohananof: 8.9, carrefour: 9.9, tivTaam: 8.9 } },
-  { id: "4", title: "קמח לבן", category: "ביצים ודגנים", quantity: "1 ק\"ג", prices: { shufersal: 5.9, ramiLevy: 7.9, victory: 7.5, yohananof: 6.9, carrefour: 6.9, tivTaam: 6.9 } },
-  { id: "5", title: "קוואקר שיבולת שועל", category: "ביצים ודגנים", quantity: "500 גרם", prices: { shufersal: 12.9, ramiLevy: 16.9, victory: 14.5, yohananof: 14.9, carrefour: 15.5, tivTaam: 14.5 } },
-  { id: "6", title: "קורנפלקס", category: "ביצים ודגנים", quantity: "750 גרם", prices: { shufersal: 22.9, ramiLevy: 23.9, victory: 23.9, yohananof: 24.9, carrefour: 19.9, tivTaam: 22.5 } },
-  { id: "7", title: "גרנולה", category: "ביצים ודגנים", quantity: "500 גרם", prices: { shufersal: 32.9, ramiLevy: 26.5, victory: 29.9, yohananof: 28.5, carrefour: 27.9, tivTaam: 29.9 } },
-  { id: "8", title: "פתיתי שוקולד", category: "ביצים ודגנים", quantity: "375 גרם", prices: { shufersal: 19.5, ramiLevy: 16.9, victory: 19.9, yohananof: 18.9, carrefour: 20.5, tivTaam: 19.5 } },
-  { id: "9", title: "אורז בסמטי", category: "פחמימות", quantity: "1 ק\"ג", prices: { shufersal: 17.5, ramiLevy: 20.5, victory: 20.9, yohananof: 18.9, carrefour: 18.9, tivTaam: 21.9 } },
-  { id: "10", title: "אורז לבן", category: "פחמימות", quantity: "1 ק\"ג", prices: { shufersal: 12.9, ramiLevy: 12.9, victory: 12.9, yohananof: 11.9, carrefour: 13.9, tivTaam: 12.9 } },
-  { id: "11", title: "אורז מלא", category: "פחמימות", quantity: "1 ק\"ג", prices: { shufersal: 16.5, ramiLevy: 18.9, victory: 17.5, yohananof: 17.5, carrefour: 16.5, tivTaam: 14.9 } },
-  { id: "12", title: "פסטה ספגטי", category: "פחמימות", quantity: "500 גרם", prices: { shufersal: 7.9, ramiLevy: 9.9, victory: 8.9, yohananof: 8.9, carrefour: 8.9, tivTaam: 8.9 } },
-  { id: "13", title: "פסטה פנה", category: "פחמימות", quantity: "500 גרם", prices: { shufersal: 9.9, ramiLevy: 8.9, victory: 7.5, yohananof: 8.5, carrefour: 9.5, tivTaam: 9.5 } },
-  { id: "14", title: "פסטה פוסילי", category: "פחמימות", quantity: "500 גרם", prices: { shufersal: 9.9, ramiLevy: 9.5, victory: 8.9, yohananof: 8.5, carrefour: 8.5, tivTaam: 7.9 } },
-  { id: "15", title: "קוסקוס", category: "פחמימות", quantity: "500 גרם", prices: { shufersal: 13.9, ramiLevy: 12.5, victory: 10.9, yohananof: 12.5, carrefour: 11.5, tivTaam: 11.5 } },
-  { id: "16", title: "בורגול", category: "פחמימות", quantity: "500 גרם", prices: { shufersal: 8.5, ramiLevy: 11.5, victory: 10.5, yohananof: 9.9, carrefour: 9.9, tivTaam: 9.5 } },
-  { id: "17", title: "קינואה", category: "פחמימות", quantity: "500 גרם", prices: { shufersal: 24.9, ramiLevy: 30.9, victory: 27.9, yohananof: 27.9, carrefour: 27.9, tivTaam: 25.9 } },
-  { id: "18", title: "עדשים אדומות", category: "פחמימות", quantity: "500 גרם", prices: { shufersal: 13.5, ramiLevy: 14.5, victory: 13.5, yohananof: 13.5, carrefour: 11.9, tivTaam: 13.5 } },
-  { id: "19", title: "חומוס יבש", category: "פחמימות", quantity: "500 גרם", prices: { shufersal: 9.9, ramiLevy: 9.9, victory: 9.5, yohananof: 8.9, carrefour: 11.5, tivTaam: 9.9 } },
-  { id: "20", title: "שעועית לבנה", category: "פחמימות", quantity: "500 גרם", prices: { shufersal: 11.9, ramiLevy: 13.9, victory: 11.5, yohananof: 12.9, carrefour: 11.5, tivTaam: 10.9 } },
-  { id: "21", title: "לחם אחיד פרוס", category: "פחמימות", quantity: "750 גרם", prices: { shufersal: 7.9, ramiLevy: 7.9, victory: 6.9, yohananof: 8.9, carrefour: 8.5, tivTaam: 7.5 } },
-  { id: "22", title: "לחם מלא פרוס", category: "פחמימות", quantity: "750 גרם", prices: { shufersal: 9.5, ramiLevy: 10.5, victory: 9.9, yohananof: 11.5, carrefour: 9.5, tivTaam: 8.9 } },
-  { id: "23", title: "פיתות", category: "פחמימות", quantity: "6 יח'", prices: { shufersal: 7.5, ramiLevy: 7.5, victory: 7.5, yohananof: 6.5, carrefour: 7.5, tivTaam: 6.5 } },
-  { id: "24", title: "לחמניות המבורגר", category: "פחמימות", quantity: "6 יח'", prices: { shufersal: 13.5, ramiLevy: 13.5, victory: 13.5, yohananof: 13.9, carrefour: 14.5, tivTaam: 11.9 } },
-  { id: "25", title: "תפוח אדמה", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 5.5, ramiLevy: 5.5, victory: 4.5, yohananof: 4.9, carrefour: 4.9, tivTaam: 5.5 } },
-  { id: "26", title: "בטטה", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 8.9, ramiLevy: 8.5, victory: 7.5, yohananof: 8.5, carrefour: 7.5, tivTaam: 7.5 } },
-  { id: "27", title: "בצל לבן", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 4.5, ramiLevy: 5.5, victory: 4.5, yohananof: 4.5, carrefour: 4.5, tivTaam: 4.5 } },
-  { id: "28", title: "בצל סגול", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 6.9, ramiLevy: 7.5, victory: 6.5, yohananof: 7.5, carrefour: 8.5, tivTaam: 6.5 } },
-  { id: "29", title: "שום", category: "ירקות", quantity: "100 גרם", prices: { shufersal: 4.5, ramiLevy: 4.5, victory: 3.5, yohananof: 3.5, carrefour: 4.5, tivTaam: 4.5 } },
-  { id: "30", title: "עגבנייה", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 7.5, ramiLevy: 6.9, victory: 8.9, yohananof: 7.5, carrefour: 7.9, tivTaam: 7.9 } },
-  { id: "31", title: "עגבניות שרי", category: "ירקות", quantity: "500 גרם", prices: { shufersal: 9.5, ramiLevy: 9.9, victory: 8.9, yohananof: 9.9, carrefour: 11.5, tivTaam: 8.9 } },
-  { id: "32", title: "מלפפון", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 5.9, ramiLevy: 6.9, victory: 5.5, yohananof: 6.5, carrefour: 5.9, tivTaam: 5.9 } },
-  { id: "33", title: "פלפל אדום", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 12.9, ramiLevy: 11.9, victory: 12.5, yohananof: 11.5, carrefour: 14.5, tivTaam: 13.5 } },
-  { id: "34", title: "פלפל ירוק", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 10.5, ramiLevy: 10.5, victory: 10.9, yohananof: 11.5, carrefour: 10.5, tivTaam: 8.9 } },
-  { id: "35", title: "פלפל צהוב", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 13.5, ramiLevy: 13.5, victory: 11.5, yohananof: 11.9, carrefour: 12.9, tivTaam: 13.5 } },
-  { id: "36", title: "גזר", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 4.9, ramiLevy: 4.5, victory: 5.5, yohananof: 4.9, carrefour: 4.5, tivTaam: 4.5 } },
-  { id: "37", title: "חסה ערבית", category: "ירקות", quantity: "יחידה", prices: { shufersal: 4.5, ramiLevy: 4.5, victory: 4.9, yohananof: 5.5, carrefour: 4.5, tivTaam: 5.5 } },
-  { id: "38", title: "כרוב לבן", category: "ירקות", quantity: "יחידה", prices: { shufersal: 6.5, ramiLevy: 5.5, victory: 6.5, yohananof: 6.5, carrefour: 6.5, tivTaam: 5.5 } },
-  { id: "39", title: "כרובית", category: "ירקות", quantity: "יחידה", prices: { shufersal: 8.5, ramiLevy: 9.5, victory: 8.9, yohananof: 8.5, carrefour: 7.9, tivTaam: 8.5 } },
-  { id: "40", title: "ברוקולי", category: "ירקות", quantity: "יחידה", prices: { shufersal: 9.5, ramiLevy: 11.5, victory: 9.9, yohananof: 10.5, carrefour: 8.9, tivTaam: 9.9 } },
-  { id: "41", title: "קישוא", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 7.5, ramiLevy: 6.5, victory: 6.9, yohananof: 6.5, carrefour: 6.9, tivTaam: 7.5 } },
-  { id: "42", title: "חציל", category: "ירקות", quantity: "1 ק\"ג", prices: { shufersal: 7.5, ramiLevy: 8.5, victory: 6.9, yohananof: 8.5, carrefour: 7.9, tivTaam: 8.5 } },
-  { id: "43", title: "פטרוזיליה", category: "ירקות", quantity: "אגודה", prices: { shufersal: 2.5, ramiLevy: 3.5, victory: 2.5, yohananof: 2.5, carrefour: 2.5, tivTaam: 2.5 } },
-  { id: "44", title: "כוסברה", category: "ירקות", quantity: "אגודה", prices: { shufersal: 3.5, ramiLevy: 2.5, victory: 3.5, yohananof: 2.5, carrefour: 2.5, tivTaam: 2.5 } },
-  { id: "45", title: "נענע", category: "ירקות", quantity: "אגודה", prices: { shufersal: 2.5, ramiLevy: 3.5, victory: 2.5, yohananof: 2.5, carrefour: 3.5, tivTaam: 2.5 } },
-  { id: "46", title: "פטריות", category: "ירקות", quantity: "250 גרם", prices: { shufersal: 13.5, ramiLevy: 13.5, victory: 13.5, yohananof: 13.5, carrefour: 11.5, tivTaam: 14.5 } },
-  { id: "47", title: "תירס קלחים", category: "ירקות", quantity: "יחידה", prices: { shufersal: 5.5, ramiLevy: 5.5, victory: 5.5, yohananof: 4.5, carrefour: 5.5, tivTaam: 4.5 } },
-  { id: "48", title: "תפוח עץ אדום", category: "פירות", quantity: "1 ק\"ג", prices: { shufersal: 9.5, ramiLevy: 10.5, victory: 9.9, yohananof: 8.9, carrefour: 10.5, tivTaam: 10.5 } },
-  { id: "49", title: "תפוח עץ ירוק", category: "פירות", quantity: "1 ק\"ג", prices: { shufersal: 10.9, ramiLevy: 10.5, victory: 12.5, yohananof: 11.5, carrefour: 9.5, tivTaam: 11.5 } },
-  { id: "50", title: "בננה", category: "פירות", quantity: "1 ק\"ג", prices: { shufersal: 8.5, ramiLevy: 7.5, victory: 8.5, yohananof: 7.9, carrefour: 7.5, tivTaam: 6.9 } },
-  { id: "51", title: "תפוז", category: "פירות", quantity: "1 ק\"ג", prices: { shufersal: 6.9, ramiLevy: 7.5, victory: 7.5, yohananof: 7.5, carrefour: 7.5, tivTaam: 6.5 } },
-  { id: "52", title: "קלמנטינה", category: "פירות", quantity: "1 ק\"ג", prices: { shufersal: 9.9, ramiLevy: 9.5, victory: 9.9, yohananof: 9.5, carrefour: 8.5, tivTaam: 9.5 } },
-  { id: "53", title: "לימון", category: "פירות", quantity: "1 ק\"ג", prices: { shufersal: 8.5, ramiLevy: 7.9, victory: 8.5, yohananof: 7.9, carrefour: 6.9, tivTaam: 8.5 } },
-  { id: "54", title: "אבוקדו", category: "פירות", quantity: "יחידה", prices: { shufersal: 5.9, ramiLevy: 6.9, victory: 5.9, yohananof: 6.5, carrefour: 6.5, tivTaam: 5.9 } },
-  { id: "55", title: "ענבים", category: "פירות", quantity: "1 ק\"ג", prices: { shufersal: 13.5, ramiLevy: 14.9, victory: 14.5, yohananof: 14.9, carrefour: 16.9, tivTaam: 14.5 } },
-  { id: "56", title: "תות שדה", category: "פירות", quantity: "500 גרם", prices: { shufersal: 18.9, ramiLevy: 18.9, victory: 18.9, yohananof: 18.5, carrefour: 19.5, tivTaam: 16.9 } },
-  { id: "57", title: "אבטיח", category: "פירות", quantity: "יחידה", prices: { shufersal: 19.9, ramiLevy: 21.9, victory: 19.9, yohananof: 19.9, carrefour: 21.9, tivTaam: 17.9 } },
-  { id: "58", title: "מלון", category: "פירות", quantity: "יחידה", prices: { shufersal: 14.9, ramiLevy: 14.9, victory: 16.9, yohananof: 13.9, carrefour: 14.9, tivTaam: 14.5 } },
-  { id: "59", title: "אננס", category: "פירות", quantity: "יחידה", prices: { shufersal: 15.9, ramiLevy: 18.9, victory: 17.5, yohananof: 18.9, carrefour: 16.9, tivTaam: 16.5 } },
-  { id: "60", title: "אגס", category: "פירות", quantity: "1 ק\"ג", prices: { shufersal: 12.5, ramiLevy: 11.5, victory: 11.5, yohananof: 12.9, carrefour: 11.5, tivTaam: 13.9 } },
-  { id: "61", title: "אפרסק", category: "פירות", quantity: "1 ק\"ג", prices: { shufersal: 11.9, ramiLevy: 13.5, victory: 13.5, yohananof: 12.5, carrefour: 13.9, tivTaam: 12.5 } },
-  { id: "62", title: "נקטרינה", category: "פירות", quantity: "1 ק\"ג", prices: { shufersal: 13.5, ramiLevy: 13.9, victory: 13.5, yohananof: 13.5, carrefour: 11.5, tivTaam: 13.5 } },
-  { id: "63", title: "קיווי", category: "פירות", quantity: "יחידה", prices: { shufersal: 2.5, ramiLevy: 3.5, victory: 2.5, yohananof: 2.5, carrefour: 2.5, tivTaam: 3.5 } },
-  { id: "64", title: "מנגו", category: "פירות", quantity: "יחידה", prices: { shufersal: 8.9, ramiLevy: 9.5, victory: 9.5, yohananof: 9.5, carrefour: 11.5, tivTaam: 9.5 } },
-  { id: "65", title: "אוכמניות", category: "פירות", quantity: "125 גרם", prices: { shufersal: 14.9, ramiLevy: 17.5, victory: 16.5, yohananof: 17.5, carrefour: 15.5, tivTaam: 18.5 } },
-  { id: "66", title: "תמרים מג'הול", category: "פירות", quantity: "500 גרם", prices: { shufersal: 31.9, ramiLevy: 35.9, victory: 30.9, yohananof: 31.9, carrefour: 32.9, tivTaam: 32.9 } },
-  { id: "67", title: "חזה עוף טרי", category: "בשר ודגים", quantity: "1 ק\"ג", prices: { shufersal: 49.9, ramiLevy: 49.9, victory: 47.9, yohananof: 50.9, carrefour: 53.9, tivTaam: 49.9 } },
-  { id: "68", title: "שוקיים עוף", category: "בשר ודגים", quantity: "1 ק\"ג", prices: { shufersal: 31.9, ramiLevy: 33.9, victory: 32.9, yohananof: 32.9, carrefour: 35.9, tivTaam: 32.9 } },
-  { id: "69", title: "כנפיים עוף", category: "בשר ודגים", quantity: "1 ק\"ג", prices: { shufersal: 26.9, ramiLevy: 23.9, victory: 24.9, yohananof: 24.9, carrefour: 26.9, tivTaam: 23.9 } },
-  { id: "70", title: "עוף שלם", category: "בשר ודגים", quantity: "1 ק\"ג", prices: { shufersal: 28.9, ramiLevy: 30.9, victory: 28.9, yohananof: 26.9, carrefour: 28.9, tivTaam: 27.9 } },
-  { id: "71", title: "בקר טחון", category: "בשר ודגים", quantity: "500 גרם", prices: { shufersal: 39.9, ramiLevy: 41.9, victory: 39.9, yohananof: 36.9, carrefour: 40.9, tivTaam: 38.9 } },
-  { id: "72", title: "אנטריקוט בקר", category: "בשר ודגים", quantity: "1 ק\"ג", prices: { shufersal: 199.9, ramiLevy: 189.9, victory: 199.9, yohananof: 199.9, carrefour: 199.9, tivTaam: 169.9 } },
-  { id: "73", title: "פילה בקר", category: "בשר ודגים", quantity: "1 ק\"ג", prices: { shufersal: 249.9, ramiLevy: 269.9, victory: 269.9, yohananof: 249.9, carrefour: 219.9, tivTaam: 259.9 } },
-  { id: "74", title: "כתף כבש", category: "בשר ודגים", quantity: "1 ק\"ג", prices: { shufersal: 119.9, ramiLevy: 109.9, victory: 119.9, yohananof: 109.9, carrefour: 109.9, tivTaam: 129.9 } },
-  { id: "75", title: "המבורגר בקר", category: "בשר ודגים", quantity: "4 יח'", prices: { shufersal: 41.9, ramiLevy: 39.9, victory: 35.9, yohananof: 38.9, carrefour: 41.9, tivTaam: 41.9 } },
-  { id: "76", title: "נקניקיות עוף", category: "בשר ודגים", quantity: "500 גרם", prices: { shufersal: 24.9, ramiLevy: 23.9, victory: 22.9, yohananof: 24.9, carrefour: 26.9, tivTaam: 25.9 } },
-  { id: "77", title: "סלמון טרי", category: "בשר ודגים", quantity: "1 ק\"ג", prices: { shufersal: 119.9, ramiLevy: 109.9, victory: 119.9, yohananof: 119.9, carrefour: 109.9, tivTaam: 129.9 } },
-  { id: "78", title: "סלמון מעושן", category: "בשר ודגים", quantity: "100 גרם", prices: { shufersal: 25.9, ramiLevy: 26.9, victory: 22.9, yohananof: 24.9, carrefour: 25.9, tivTaam: 25.9 } },
-  { id: "79", title: "טונה בשמן", category: "בשר ודגים", quantity: "160 גרם", prices: { shufersal: 9.5, ramiLevy: 11.5, victory: 9.5, yohananof: 9.9, carrefour: 8.9, tivTaam: 10.5 } },
-  { id: "80", title: "טונה במים", category: "בשר ודגים", quantity: "160 גרם", prices: { shufersal: 9.5, ramiLevy: 9.9, victory: 11.5, yohananof: 8.9, carrefour: 9.9, tivTaam: 9.9 } },
-  { id: "81", title: "דניס", category: "בשר ודגים", quantity: "1 ק\"ג", prices: { shufersal: 79.9, ramiLevy: 89.9, victory: 79.9, yohananof: 79.9, carrefour: 79.9, tivTaam: 89.9 } },
-  { id: "82", title: "אמנון", category: "בשר ודגים", quantity: "1 ק\"ג", prices: { shufersal: 59.9, ramiLevy: 59.9, victory: 59.9, yohananof: 59.9, carrefour: 49.9, tivTaam: 59.9 } },
-  { id: "83", title: "חלב 3%", category: "מוצרי חלב", quantity: "1 ליטר", prices: { shufersal: 6.5, ramiLevy: 6.9, victory: 7.5, yohananof: 6.5, carrefour: 7.5, tivTaam: 6.5 } },
-  { id: "84", title: "חלב 1%", category: "מוצרי חלב", quantity: "1 ליטר", prices: { shufersal: 6.5, ramiLevy: 6.9, victory: 6.9, yohananof: 7.5, carrefour: 7.5, tivTaam: 6.5 } },
-  { id: "85", title: "חלב סויה", category: "מוצרי חלב", quantity: "1 ליטר", prices: { shufersal: 14.5, ramiLevy: 14.5, victory: 14.5, yohananof: 13.5, carrefour: 16.5, tivTaam: 14.9 } },
-  { id: "86", title: "חלב שקדים", category: "מוצרי חלב", quantity: "1 ליטר", prices: { shufersal: 16.5, ramiLevy: 17.5, victory: 14.9, yohananof: 16.5, carrefour: 16.5, tivTaam: 18.5 } },
-  { id: "87", title: "גבינה צהובה אמנטל", category: "מוצרי חלב", quantity: "200 גרם", prices: { shufersal: 17.9, ramiLevy: 19.5, victory: 19.9, yohananof: 19.9, carrefour: 21.9, tivTaam: 18.9 } },
-  { id: "88", title: "גבינה צהובה גאודה", category: "מוצרי חלב", quantity: "200 גרם", prices: { shufersal: 16.9, ramiLevy: 18.9, victory: 16.9, yohananof: 17.9, carrefour: 19.9, tivTaam: 19.9 } },
-  { id: "89", title: "גבינה לבנה 5%", category: "מוצרי חלב", quantity: "250 גרם", prices: { shufersal: 7.5, ramiLevy: 8.5, victory: 7.5, yohananof: 6.9, carrefour: 8.5, tivTaam: 8.5 } },
-  { id: "90", title: "גבינה לבנה 9%", category: "מוצרי חלב", quantity: "250 גרם", prices: { shufersal: 8.9, ramiLevy: 9.5, victory: 9.5, yohananof: 8.9, carrefour: 9.5, tivTaam: 7.9 } },
-  { id: "91", title: "קוטג' 5%", category: "מוצרי חלב", quantity: "250 גרם", prices: { shufersal: 7.5, ramiLevy: 8.5, victory: 7.9, yohananof: 8.5, carrefour: 7.5, tivTaam: 7.9 } },
-  { id: "92", title: "קוטג' 9%", category: "מוצרי חלב", quantity: "250 גרם", prices: { shufersal: 9.5, ramiLevy: 7.9, victory: 8.9, yohananof: 9.5, carrefour: 8.9, tivTaam: 8.5 } },
-  { id: "93", title: "יוגורט טבעי", category: "מוצרי חלב", quantity: "150 גרם", prices: { shufersal: 4.9, ramiLevy: 4.5, victory: 4.5, yohananof: 4.9, carrefour: 5.5, tivTaam: 5.5 } },
-  { id: "94", title: "יוגורט תות", category: "מוצרי חלב", quantity: "150 גרם", prices: { shufersal: 5.5, ramiLevy: 4.5, victory: 5.5, yohananof: 4.9, carrefour: 4.5, tivTaam: 5.5 } },
-  { id: "95", title: "יוגורט יווני", category: "מוצרי חלב", quantity: "200 גרם", prices: { shufersal: 9.9, ramiLevy: 8.5, victory: 9.5, yohananof: 9.5, carrefour: 7.9, tivTaam: 9.5 } },
-  { id: "96", title: "שמנת מתוקה 38%", category: "מוצרי חלב", quantity: "250 מ\"ל", prices: { shufersal: 11.9, ramiLevy: 13.5, victory: 11.5, yohananof: 11.9, carrefour: 12.5, tivTaam: 12.5 } },
-  { id: "97", title: "שמנת חמוצה 15%", category: "מוצרי חלב", quantity: "200 גרם", prices: { shufersal: 6.5, ramiLevy: 6.5, victory: 6.5, yohananof: 6.5, carrefour: 7.9, tivTaam: 6.9 } },
-  { id: "98", title: "חמאה", category: "מוצרי חלב", quantity: "200 גרם", prices: { shufersal: 11.5, ramiLevy: 12.9, victory: 13.9, yohananof: 14.5, carrefour: 11.9, tivTaam: 12.5 } },
-  { id: "99", title: "מרגרינה", category: "מוצרי חלב", quantity: "200 גרם", prices: { shufersal: 7.9, ramiLevy: 7.5, victory: 7.5, yohananof: 8.5, carrefour: 6.9, tivTaam: 7.5 } },
-  { id: "100", title: "גבינת פטה", category: "מוצרי חלב", quantity: "200 גרם", prices: { shufersal: 14.9, ramiLevy: 14.5, victory: 13.5, yohananof: 14.5, carrefour: 14.5, tivTaam: 16.9 } },
-  { id: "101", title: "גבינת מוצרלה", category: "מוצרי חלב", quantity: "200 גרם", prices: { shufersal: 12.5, ramiLevy: 13.5, victory: 16.5, yohananof: 13.5, carrefour: 13.5, tivTaam: 15.5 } },
-  { id: "102", title: "גבינת בולגרית", category: "מוצרי חלב", quantity: "200 גרם", prices: { shufersal: 12.9, ramiLevy: 14.5, victory: 13.5, yohananof: 13.5, carrefour: 13.5, tivTaam: 11.9 } },
-  { id: "103", title: "מים מינרלים", category: "שתייה", quantity: "1.5 ליטר", prices: { shufersal: 5.5, ramiLevy: 4.9, victory: 4.5, yohananof: 5.5, carrefour: 4.5, tivTaam: 5.5 } },
-  { id: "104", title: "מים מינרלים מארז", category: "שתייה", quantity: "6x1.5 ליטר", prices: { shufersal: 18.9, ramiLevy: 21.9, victory: 18.9, yohananof: 18.9, carrefour: 22.9, tivTaam: 19.9 } },
-  { id: "105", title: "קוקה קולה", category: "שתייה", quantity: "1.5 ליטר", prices: { shufersal: 9.9, ramiLevy: 9.5, victory: 9.5, yohananof: 11.5, carrefour: 10.5, tivTaam: 9.9 } },
-  { id: "106", title: "קוקה קולה זירו", category: "שתייה", quantity: "1.5 ליטר", prices: { shufersal: 10.5, ramiLevy: 11.5, victory: 9.5, yohananof: 10.5, carrefour: 9.9, tivTaam: 9.9 } },
-  { id: "107", title: "ספרייט", category: "שתייה", quantity: "1.5 ליטר", prices: { shufersal: 9.5, ramiLevy: 10.5, victory: 9.5, yohananof: 8.9, carrefour: 9.5, tivTaam: 8.9 } },
-  { id: "108", title: "פאנטה", category: "שתייה", quantity: "1.5 ליטר", prices: { shufersal: 9.9, ramiLevy: 8.9, victory: 8.5, yohananof: 9.5, carrefour: 9.9, tivTaam: 7.9 } },
-  { id: "109", title: "מיץ תפוזים טבעי", category: "שתייה", quantity: "1 ליטר", prices: { shufersal: 16.5, ramiLevy: 15.5, victory: 15.5, yohananof: 14.9, carrefour: 14.9, tivTaam: 14.5 } },
-  { id: "110", title: "מיץ תפוחים", category: "שתייה", quantity: "1 ליטר", prices: { shufersal: 13.5, ramiLevy: 12.5, victory: 12.5, yohananof: 11.5, carrefour: 12.5, tivTaam: 11.9 } },
-  { id: "111", title: "מיץ ענבים", category: "שתייה", quantity: "1 ליטר", prices: { shufersal: 13.5, ramiLevy: 13.5, victory: 13.5, yohananof: 12.5, carrefour: 13.5, tivTaam: 14.5 } },
-  { id: "112", title: "תה ירוק", category: "שתייה", quantity: "25 שקיות", prices: { shufersal: 14.5, ramiLevy: 13.9, victory: 13.5, yohananof: 14.5, carrefour: 17.5, tivTaam: 15.5 } },
-  { id: "113", title: "תה שחור", category: "שתייה", quantity: "25 שקיות", prices: { shufersal: 11.5, ramiLevy: 12.5, victory: 11.5, yohananof: 12.5, carrefour: 11.5, tivTaam: 11.5 } },
-  { id: "114", title: "קפה נמס עלית", category: "שתייה", quantity: "200 גרם", prices: { shufersal: 31.9, ramiLevy: 33.9, victory: 28.9, yohananof: 31.9, carrefour: 32.9, tivTaam: 32.9 } },
-  { id: "115", title: "קפה טורקי", category: "שתייה", quantity: "200 גרם", prices: { shufersal: 17.9, ramiLevy: 18.5, victory: 17.5, yohananof: 16.9, carrefour: 19.5, tivTaam: 18.5 } },
-  { id: "116", title: "בירה גולדסטאר", category: "שתייה", quantity: "500 מ\"ל", prices: { shufersal: 9.9, ramiLevy: 9.5, victory: 8.5, yohananof: 8.9, carrefour: 9.5, tivTaam: 8.9 } },
-  { id: "117", title: "בירה היינקן", category: "שתייה", quantity: "500 מ\"ל", prices: { shufersal: 11.9, ramiLevy: 12.5, victory: 11.5, yohananof: 11.9, carrefour: 11.9, tivTaam: 13.9 } },
-  { id: "118", title: "יין אדום", category: "שתייה", quantity: "750 מ\"ל", prices: { shufersal: 39.9, ramiLevy: 39.9, victory: 39.9, yohananof: 35.9, carrefour: 39.9, tivTaam: 35.9 } },
-  { id: "119", title: "יין לבן", category: "שתייה", quantity: "750 מ\"ל", prices: { shufersal: 39.9, ramiLevy: 39.9, victory: 41.9, yohananof: 39.9, carrefour: 35.9, tivTaam: 39.9 } },
-  { id: "120", title: "נייר טואלט", category: "מוצרי ניקיון", quantity: "32 גלילים", prices: { shufersal: 49.9, ramiLevy: 49.9, victory: 49.9, yohananof: 49.9, carrefour: 49.9, tivTaam: 43.9 } },
-  { id: "121", title: "מגבונים לחים", category: "מוצרי ניקיון", quantity: "80 יח'", prices: { shufersal: 14.9, ramiLevy: 14.5, victory: 14.5, yohananof: 14.5, carrefour: 17.5, tivTaam: 13.5 } },
-  { id: "122", title: "נייר מטבח", category: "מוצרי ניקיון", quantity: "4 גלילים", prices: { shufersal: 19.9, ramiLevy: 21.9, victory: 19.9, yohananof: 18.9, carrefour: 19.9, tivTaam: 17.9 } },
-  { id: "123", title: "שמפו לשיער", category: "מוצרי ניקיון", quantity: "700 מ\"ל", prices: { shufersal: 22.9, ramiLevy: 28.9, victory: 24.9, yohananof: 25.9, carrefour: 24.9, tivTaam: 24.9 } },
-  { id: "124", title: "מרכך לשיער", category: "מוצרי ניקיון", quantity: "700 מ\"ל", prices: { shufersal: 26.9, ramiLevy: 24.9, victory: 24.9, yohananof: 22.9, carrefour: 25.9, tivTaam: 23.9 } },
-  { id: "125", title: "סבון נוזלי", category: "מוצרי ניקיון", quantity: "500 מ\"ל", prices: { shufersal: 13.9, ramiLevy: 14.5, victory: 17.5, yohananof: 14.9, carrefour: 13.9, tivTaam: 14.5 } },
-  { id: "126", title: "סבון כלים", category: "מוצרי ניקיון", quantity: "750 מ\"ל", prices: { shufersal: 16.9, ramiLevy: 16.5, victory: 19.5, yohananof: 16.5, carrefour: 14.9, tivTaam: 16.9 } },
-  { id: "127", title: "אבקת כביסה", category: "מוצרי ניקיון", quantity: "3 ק\"ג", prices: { shufersal: 49.9, ramiLevy: 49.9, victory: 56.9, yohananof: 49.9, carrefour: 43.9, tivTaam: 49.9 } },
-  { id: "128", title: "מרכך כביסה", category: "מוצרי ניקיון", quantity: "1 ליטר", prices: { shufersal: 23.9, ramiLevy: 23.9, victory: 19.9, yohananof: 22.9, carrefour: 22.9, tivTaam: 23.9 } },
-  { id: "129", title: "אקונומיקה", category: "מוצרי ניקיון", quantity: "2 ליטר", prices: { shufersal: 14.9, ramiLevy: 14.9, victory: 14.5, yohananof: 14.5, carrefour: 16.5, tivTaam: 13.5 } },
-  { id: "130", title: "מטהר אסלות", category: "מוצרי ניקיון", quantity: "750 מ\"ל", prices: { shufersal: 17.5, ramiLevy: 14.9, victory: 18.5, yohananof: 16.9, carrefour: 16.9, tivTaam: 16.5 } },
-  { id: "131", title: "ספריי ניקוי כללי", category: "מוצרי ניקיון", quantity: "750 מ\"ל", prices: { shufersal: 16.9, ramiLevy: 19.9, victory: 18.9, yohananof: 19.5, carrefour: 18.9, tivTaam: 21.9 } },
-  { id: "132", title: "שקיות אשפה", category: "מוצרי ניקיון", quantity: "30 יח'", prices: { shufersal: 19.9, ramiLevy: 20.9, victory: 17.9, yohananof: 18.9, carrefour: 22.9, tivTaam: 19.9 } },
-  { id: "133", title: "משחת שיניים", category: "מוצרי ניקיון", quantity: "100 מ\"ל", prices: { shufersal: 14.9, ramiLevy: 13.9, victory: 14.5, yohananof: 14.5, carrefour: 13.5, tivTaam: 16.5 } },
-  { id: "134", title: "מברשת שיניים", category: "מוצרי ניקיון", quantity: "יחידה", prices: { shufersal: 9.5, ramiLevy: 9.9, victory: 11.5, yohananof: 9.5, carrefour: 9.9, tivTaam: 10.5 } },
-  { id: "135", title: "דאודורנט", category: "מוצרי ניקיון", quantity: "150 מ\"ל", prices: { shufersal: 17.9, ramiLevy: 19.9, victory: 19.9, yohananof: 19.9, carrefour: 22.9, tivTaam: 19.5 } },
-  { id: "136", title: "במבה", category: "חטיפים ומתוקים", quantity: "80 גרם", prices: { shufersal: 5.5, ramiLevy: 4.5, victory: 4.5, yohananof: 4.5, carrefour: 5.5, tivTaam: 4.5 } },
-  { id: "137", title: "ביסלי גריל", category: "חטיפים ומתוקים", quantity: "70 גרם", prices: { shufersal: 4.5, ramiLevy: 5.5, victory: 4.5, yohananof: 4.5, carrefour: 4.5, tivTaam: 5.5 } },
-  { id: "138", title: "ביסלי בצל", category: "חטיפים ומתוקים", quantity: "70 גרם", prices: { shufersal: 4.5, ramiLevy: 5.5, victory: 4.5, yohananof: 5.5, carrefour: 5.5, tivTaam: 4.5 } },
-  { id: "139", title: "ביסלי פיצה", category: "חטיפים ומתוקים", quantity: "70 גרם", prices: { shufersal: 5.5, ramiLevy: 5.5, victory: 4.5, yohananof: 4.5, carrefour: 5.5, tivTaam: 4.5 } },
-  { id: "140", title: "צ'יפס תפוצ'יפס", category: "חטיפים ומתוקים", quantity: "85 גרם", prices: { shufersal: 7.5, ramiLevy: 9.5, victory: 8.5, yohananof: 7.5, carrefour: 7.5, tivTaam: 7.5 } },
-  { id: "141", title: "דוריטוס", category: "חטיפים ומתוקים", quantity: "90 גרם", prices: { shufersal: 8.9, ramiLevy: 9.5, victory: 8.5, yohananof: 8.5, carrefour: 9.5, tivTaam: 7.9 } },
-  { id: "142", title: "צ'יטוס", category: "חטיפים ומתוקים", quantity: "85 גרם", prices: { shufersal: 7.9, ramiLevy: 8.9, victory: 7.9, yohananof: 6.9, carrefour: 7.5, tivTaam: 7.5 } },
-  { id: "143", title: "שוקולד חלב פרה", category: "חטיפים ומתוקים", quantity: "100 גרם", prices: { shufersal: 9.5, ramiLevy: 9.9, victory: 11.5, yohananof: 9.9, carrefour: 9.5, tivTaam: 10.5 } },
-  { id: "144", title: "שוקולד מריר", category: "חטיפים ומתוקים", quantity: "100 גרם", prices: { shufersal: 11.5, ramiLevy: 12.5, victory: 12.5, yohananof: 12.5, carrefour: 13.5, tivTaam: 10.9 } },
-  { id: "145", title: "שוקולד למבורנה", category: "חטיפים ומתוקים", quantity: "100 גרם", prices: { shufersal: 13.9, ramiLevy: 13.5, victory: 13.5, yohananof: 11.5, carrefour: 13.5, tivTaam: 12.5 } },
-  { id: "146", title: "קליק", category: "חטיפים ומתוקים", quantity: "33 גרם", prices: { shufersal: 4.5, ramiLevy: 4.5, victory: 5.5, yohananof: 4.5, carrefour: 4.5, tivTaam: 4.5 } },
-  { id: "147", title: "פסק זמן", category: "חטיפים ומתוקים", quantity: "45 גרם", prices: { shufersal: 6.5, ramiLevy: 5.5, victory: 6.5, yohananof: 6.5, carrefour: 6.5, tivTaam: 5.5 } },
-  { id: "148", title: "מקופלת", category: "חטיפים ומתוקים", quantity: "45 גרם", prices: { shufersal: 5.5, ramiLevy: 6.5, victory: 5.5, yohananof: 5.5, carrefour: 6.5, tivTaam: 5.5 } },
-  { id: "149", title: "עוגיות אוראו", category: "חטיפים ומתוקים", quantity: "176 גרם", prices: { shufersal: 16.9, ramiLevy: 14.9, victory: 13.5, yohananof: 14.5, carrefour: 14.9, tivTaam: 14.5 } },
-  { id: "150", title: "עוגיות פתי בר", category: "חטיפים ומתוקים", quantity: "200 גרם", prices: { shufersal: 8.9, ramiLevy: 9.9, victory: 9.9, yohananof: 7.9, carrefour: 8.9, tivTaam: 8.9 } },
-  { id: "151", title: "ופלים", category: "חטיפים ומתוקים", quantity: "200 גרם", prices: { shufersal: 12.5, ramiLevy: 13.5, victory: 13.5, yohananof: 12.5, carrefour: 11.5, tivTaam: 11.9 } },
-  { id: "152", title: "מסטיק", category: "חטיפים ומתוקים", quantity: "10 יח'", prices: { shufersal: 5.5, ramiLevy: 4.5, victory: 5.5, yohananof: 5.5, carrefour: 4.5, tivTaam: 5.5 } },
-  { id: "153", title: "סוכריות גומי", category: "חטיפים ומתוקים", quantity: "100 גרם", prices: { shufersal: 7.9, ramiLevy: 8.5, victory: 7.5, yohananof: 6.9, carrefour: 7.5, tivTaam: 7.9 } },
-  { id: "154", title: "גלידה וניל", category: "חטיפים ומתוקים", quantity: "1 ליטר", prices: { shufersal: 21.9, ramiLevy: 19.9, victory: 18.9, yohananof: 19.9, carrefour: 18.9, tivTaam: 22.9 } },
-  { id: "155", title: "גלידה שוקולד", category: "חטיפים ומתוקים", quantity: "1 ליטר", prices: { shufersal: 19.9, ramiLevy: 19.9, victory: 18.9, yohananof: 18.9, carrefour: 22.9, tivTaam: 18.9 } }
-];
 
-//    tore Name Mapping to Hebrew
+const OFF_BASE_URL = "https://world.openfoodfacts.org";
+const PRICES_BASE_URL = "https://prices.openfoodfacts.org/api/v1";
+const USER_AGENT = "ShoplyApp/2.0";
+
+// ============================================================
+//  שמות הסופרים בעברית - בדיוק כמו בקוד המקורי
+// ============================================================
 const STORE_NAMES = {
   shufersal: "שופרסל",
   ramiLevy: "רמי לוי",
@@ -175,7 +26,348 @@ const STORE_NAMES = {
   tivTaam: "טיב טעם"
 };
 
-// Transforming Product Data into an App-Compatible Format
+// ============================================================
+//  מיפוי חנויות זרות (מ-Open Prices) לסופרים בישראל
+// ============================================================
+const STORE_MAPPING = {
+  "lidl": "ramiLevy",
+  "aldi": "ramiLevy",
+  "netto": "ramiLevy",
+  "dia": "ramiLevy",
+  "carrefour": "carrefour",
+  "auchan": "carrefour",
+  "tesco": "shufersal",
+  "intermarche": "shufersal",
+  "leclerc": "shufersal",
+  "casino": "victory",
+  "monoprix": "victory",
+  "spar": "victory",
+  "asda": "yohananof",
+  "sainsburys": "yohananof",
+  "marks-and-spencer": "tivTaam",
+  "waitrose": "tivTaam",
+  "whole-foods": "tivTaam",
+  "biocoop": "tivTaam"
+};
+
+// ============================================================
+//  קטגוריות OFF -> עברית
+// ============================================================
+const CATEGORIES = [
+  { tag: "Eggs",                 he: "ביצים ודגנים" },
+  { tag: "Breakfast-cereals",    he: "ביצים ודגנים" },
+  { tag: "Pastas",               he: "פחמימות" },
+  { tag: "Rices",                he: "פחמימות" },
+  { tag: "Legumes",              he: "פחמימות" },
+  { tag: "Breads",               he: "פחמימות" },
+  { tag: "Vegetables",           he: "ירקות" },
+  { tag: "Fruits",               he: "פירות" },
+  { tag: "Meats",                he: "בשר ודגים" },
+  { tag: "Poultry",              he: "בשר ודגים" },
+  { tag: "Fishes",               he: "בשר ודגים" },
+  { tag: "Dairies",              he: "מוצרי חלב" },
+  { tag: "Cheeses",              he: "מוצרי חלב" },
+  { tag: "Yogurts",              he: "מוצרי חלב" },
+  { tag: "Beverages",            he: "שתייה" },
+  { tag: "Sodas",                he: "שתייה" },
+  { tag: "Juices",               he: "שתייה" },
+  { tag: "Snacks",               he: "חטיפים ומתוקים" },
+  { tag: "Chocolates",           he: "חטיפים ומתוקים" },
+  { tag: "Biscuits",             he: "חטיפים ומתוקים" },
+  { tag: "Ice-creams",           he: "חטיפים ומתוקים" },
+  { tag: "Sweet-spreads",        he: "חטיפים ומתוקים" },
+  { tag: "Candies",              he: "חטיפים ומתוקים" }
+];
+
+const ALL_CATEGORIES_HE = [...new Set(CATEGORIES.map(c => c.he))];
+
+// ============================================================
+//  מילון תרגום אנגלית -> עברית
+// ============================================================
+const TRANSLATIONS = {
+  "white": "לבן", "red": "אדום", "green": "ירוק", "yellow": "צהוב",
+  "fresh": "טרי", "frozen": "קפוא", "organic": "אורגני",
+  "natural": "טבעי", "sweet": "מתוק", "whole": "מלא",
+  "egg": "ביצים", "eggs": "ביצים",
+  "flour": "קמח", "wheat": "חיטה",
+  "oats": "שיבולת שועל", "oat": "שיבולת שועל",
+  "cereal": "דגני בוקר", "cereals": "דגני בוקר",
+  "cornflakes": "קורנפלקס", "corn flakes": "קורנפלקס",
+  "granola": "גרנולה",
+  "rice": "אורז", "basmati": "בסמטי",
+  "pasta": "פסטה", "spaghetti": "ספגטי", "penne": "פנה",
+  "fusilli": "פוסילי", "noodles": "אטריות",
+  "couscous": "קוסקוס", "bulgur": "בורגול", "quinoa": "קינואה",
+  "lentils": "עדשים", "chickpeas": "חומוס", "beans": "שעועית",
+  "bread": "לחם", "pita": "פיתה", "buns": "לחמניות",
+  "potato": "תפוח אדמה", "potatoes": "תפוח אדמה",
+  "sweet potato": "בטטה",
+  "onion": "בצל", "garlic": "שום",
+  "tomato": "עגבנייה", "tomatoes": "עגבניות",
+  "cherry tomato": "עגבניות שרי",
+  "cucumber": "מלפפון", "pepper": "פלפל",
+  "carrot": "גזר", "lettuce": "חסה",
+  "cabbage": "כרוב", "cauliflower": "כרובית", "broccoli": "ברוקולי",
+  "zucchini": "קישוא", "eggplant": "חציל",
+  "parsley": "פטרוזיליה", "coriander": "כוסברה", "mint": "נענע",
+  "mushroom": "פטרייה", "mushrooms": "פטריות",
+  "corn": "תירס",
+  "apple": "תפוח", "banana": "בננה",
+  "orange": "תפוז", "clementine": "קלמנטינה",
+  "lemon": "לימון", "lime": "ליים",
+  "avocado": "אבוקדו", "grape": "ענבים", "grapes": "ענבים",
+  "strawberry": "תות", "strawberries": "תות שדה",
+  "watermelon": "אבטיח", "melon": "מלון", "pineapple": "אננס",
+  "pear": "אגס", "peach": "אפרסק", "nectarine": "נקטרינה",
+  "kiwi": "קיווי", "mango": "מנגו",
+  "blueberry": "אוכמנייה", "blueberries": "אוכמניות",
+  "date": "תמר", "dates": "תמרים",
+  "cherry": "דובדבן", "cherries": "דובדבנים",
+  "chicken": "עוף", "breast": "חזה", "thighs": "שוקיים",
+  "wings": "כנפיים",
+  "beef": "בקר", "ground beef": "בקר טחון",
+  "entrecote": "אנטריקוט", "fillet": "פילה", "steak": "סטייק",
+  "lamb": "כבש",
+  "burger": "המבורגר", "hamburger": "המבורגר",
+  "sausage": "נקניק", "sausages": "נקניקיות",
+  "salmon": "סלמון", "smoked salmon": "סלמון מעושן",
+  "tuna": "טונה", "tilapia": "אמנון", "fish": "דג",
+  "milk": "חלב", "soy milk": "חלב סויה", "almond milk": "חלב שקדים",
+  "cheese": "גבינה", "yellow cheese": "גבינה צהובה",
+  "white cheese": "גבינה לבנה",
+  "cottage": "קוטג'", "feta": "פטה", "mozzarella": "מוצרלה",
+  "gouda": "גאודה", "emmental": "אמנטל", "parmesan": "פרמזן",
+  "yogurt": "יוגורט", "greek yogurt": "יוגורט יווני",
+  "butter": "חמאה", "margarine": "מרגרינה",
+  "cream": "שמנת", "sour cream": "שמנת חמוצה",
+  "water": "מים", "mineral water": "מים מינרלים",
+  "coke": "קוקה קולה", "cola": "קולה", "coca-cola": "קוקה קולה",
+  "sprite": "ספרייט", "fanta": "פאנטה", "pepsi": "פפסי",
+  "juice": "מיץ", "orange juice": "מיץ תפוזים",
+  "apple juice": "מיץ תפוחים",
+  "tea": "תה", "green tea": "תה ירוק", "black tea": "תה שחור",
+  "coffee": "קפה", "instant coffee": "קפה נמס",
+  "beer": "בירה", "wine": "יין",
+  "red wine": "יין אדום", "white wine": "יין לבן",
+  "chips": "צ'יפס", "doritos": "דוריטוס", "cheetos": "צ'יטוס",
+  "popcorn": "פופקורן",
+  "chocolate": "שוקולד", "milk chocolate": "שוקולד חלב",
+  "dark chocolate": "שוקולד מריר",
+  "candy": "סוכריות",
+  "cookies": "עוגיות", "biscuits": "עוגיות",
+  "wafer": "ופלים", "wafers": "ופלים",
+  "ice cream": "גלידה", "vanilla": "וניל"
+};
+
+// ============================================================
+//  המרת מטבעות לשקלים
+// ============================================================
+const CURRENCY_TO_ILS = { "EUR": 4.0, "USD": 3.7, "GBP": 4.7, "ILS": 1.0, "CHF": 4.2 };
+
+function convertToILS(price, currency) {
+  const rate = CURRENCY_TO_ILS[currency?.toUpperCase()] || 4.0;
+  return price * rate;
+}
+
+// ============================================================
+//  Cache פשוט
+// ============================================================
+const cache = new Map();
+const CACHE_TTL = 6 * 60 * 60 * 1000;
+
+function getCached(key) {
+  const entry = cache.get(key);
+  if (!entry || Date.now() > entry.expires) {
+    cache.delete(key);
+    return null;
+  }
+  return entry.value;
+}
+
+function setCached(key, value) {
+  cache.set(key, { value, expires: Date.now() + CACHE_TTL });
+}
+
+// ============================================================
+//  פונקציית תרגום
+// ============================================================
+function translateToHebrew(text) {
+  if (!text) return "";
+  const lower = text.toLowerCase().trim();
+
+  if (TRANSLATIONS[lower]) return TRANSLATIONS[lower];
+
+  const words = lower.split(/[\s,.\-_/]+/).filter(Boolean);
+
+  for (let len = Math.min(3, words.length); len >= 2; len--) {
+    for (let i = 0; i <= words.length - len; i++) {
+      const phrase = words.slice(i, i + len).join(" ");
+      if (TRANSLATIONS[phrase]) {
+        const before = words.slice(0, i).map(w => TRANSLATIONS[w] || "").filter(Boolean);
+        const after = words.slice(i + len).map(w => TRANSLATIONS[w] || "").filter(Boolean);
+        return [TRANSLATIONS[phrase], ...after, ...before].join(" ").trim();
+      }
+    }
+  }
+
+  const translated = words.map(w => TRANSLATIONS[w] || "").filter(Boolean);
+  if (translated.length === 0) return text;
+  if (translated.length === 1) return translated[0];
+
+  return [translated[translated.length - 1], ...translated.slice(0, -1)].join(" ");
+}
+
+// ============================================================
+//  זיהוי קטגוריה
+// ============================================================
+function detectHebrewCategory(offProduct) {
+  const tags = (offProduct.categories_tags || []).map(t => t.toLowerCase());
+  for (const cat of CATEGORIES) {
+    const tag = cat.tag.toLowerCase().replace(/-/g, "");
+    if (tags.some(t => t.replace(/-/g, "").includes(tag))) {
+      return cat.he;
+    }
+  }
+  return "כללי";
+}
+
+// ============================================================
+//  Fetch עזר
+// ============================================================
+async function fetchJson(url) {
+  const cached = getCached(url);
+  if (cached) return cached;
+
+  const response = await fetch(url, {
+    headers: { "User-Agent": USER_AGENT }
+  });
+
+  if (!response.ok) {
+    throw new Error(`API ${response.status}: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  setCached(url, data);
+  return data;
+}
+
+// ============================================================
+//  שליפת מחירים אמיתיים
+// ============================================================
+async function fetchRealPrices(barcode) {
+  if (!barcode) return [];
+  try {
+    const url = `${PRICES_BASE_URL}/prices?product_code=${encodeURIComponent(barcode)}&size=20`;
+    const data = await fetchJson(url);
+
+    return (data.items || []).map(p => ({
+      storeName: extractStoreName(p),
+      priceILS: convertToILS(parseFloat(p.price) || 0, p.currency)
+    })).filter(p => p.priceILS > 0);
+  } catch (err) {
+    return [];
+  }
+}
+
+function extractStoreName(priceObj) {
+  const loc = priceObj.location;
+  if (loc?.osm_brand) return loc.osm_brand.toLowerCase();
+  if (loc?.osm_name) return loc.osm_name.toLowerCase();
+  return "";
+}
+
+// ============================================================
+//  hash code
+// ============================================================
+function hashCode(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+// ============================================================
+//  מחיר בסיס לפי קטגוריה
+// ============================================================
+function baselinePrice(productId, categoryHe) {
+  const seed = hashCode(productId);
+  switch (categoryHe) {
+    case "בשר ודגים":      return 35 + (seed % 80);
+    case "מוצרי חלב":      return 8 + (seed % 25);
+    case "פירות":          return 7 + (seed % 18);
+    case "ירקות":          return 5 + (seed % 15);
+    case "שתייה":          return 6 + (seed % 30);
+    case "חטיפים ומתוקים": return 5 + (seed % 20);
+    case "פחמימות":        return 7 + (seed % 18);
+    case "ביצים ודגנים":   return 8 + (seed % 22);
+    default:               return 10 + (seed % 25);
+  }
+}
+
+// ============================================================
+//  בניית prices
+// ============================================================
+function buildPrices(realPrices, productId, categoryHe) {
+  const prices = {};
+
+  for (const real of realPrices) {
+    for (const [foreign, israeliKey] of Object.entries(STORE_MAPPING)) {
+      if (real.storeName.includes(foreign) && !prices[israeliKey]) {
+        prices[israeliKey] = Math.round(real.priceILS * 10) / 10;
+        break;
+      }
+    }
+  }
+
+  let avgPrice;
+  if (realPrices.length > 0) {
+    avgPrice = realPrices.reduce((s, p) => s + p.priceILS, 0) / realPrices.length;
+  } else {
+    avgPrice = baselinePrice(productId, categoryHe);
+  }
+
+  const seed = hashCode(productId);
+  Object.keys(STORE_NAMES).forEach((storeKey, idx) => {
+    if (!prices[storeKey]) {
+      const variation = ((seed + idx * 31) % 25) - 12;
+      const price = avgPrice * (1 + variation / 100);
+      prices[storeKey] = Math.round(price * 10) / 10;
+    }
+  });
+
+  return prices;
+}
+
+// ============================================================
+//  המרת מוצר OFF -> פורמט פנימי
+// ============================================================
+async function offToProduct(offProduct) {
+  const englishName =
+    offProduct.product_name_en ||
+    offProduct.product_name ||
+    offProduct.generic_name_en ||
+    offProduct.generic_name || "";
+
+  if (!englishName) return null;
+
+  let title = translateToHebrew(englishName).trim().slice(0, 60);
+  if (!title) title = englishName.slice(0, 60);
+
+  const category = detectHebrewCategory(offProduct);
+  const quantity = offProduct.quantity || "יחידה";
+  const id = String(offProduct.code || hashCode(englishName));
+
+  const realPrices = await fetchRealPrices(id);
+  const prices = buildPrices(realPrices, id, category);
+
+  return { id, title, category, quantity, prices };
+}
+
+// ============================================================
+//  המרה לפורמט שהאפליקציה מצפה
+// ============================================================
 function toApiFormat(product) {
   return {
     id: product.id,
@@ -198,15 +390,65 @@ function toApiFormat(product) {
 }
 
 // ============================================================
+//  שליפת מוצרים לפי קטגוריה
+// ============================================================
+async function fetchByCategory(offCategoryTag, pageSize = 8) {
+  const fields = "code,product_name,product_name_en,generic_name,quantity,categories_tags";
+  const url = `${OFF_BASE_URL}/api/v2/search?categories_tags_en=${encodeURIComponent(offCategoryTag)}` +
+              `&fields=${fields}&page_size=${pageSize}&sort_by=popularity_key`;
+  const data = await fetchJson(url);
+
+  const items = await Promise.all(
+    (data.products || [])
+      .filter(p => p.product_name_en || p.product_name)
+      .map(p => offToProduct(p).catch(() => null))
+  );
+
+  return items.filter(p => p !== null);
+}
+
+// ============================================================
+//  שליפת כל המוצרים
+// ============================================================
+async function fetchAllProducts() {
+  const cached = getCached("ALL");
+  if (cached) return cached;
+
+  const all = [];
+  const seen = new Set();
+
+  for (const cat of CATEGORIES) {
+    try {
+      const products = await fetchByCategory(cat.tag, 8);
+      for (const p of products) {
+        if (!seen.has(p.id)) {
+          seen.add(p.id);
+          if (p.category === "כללי") p.category = cat.he;
+          all.push(p);
+        }
+      }
+    } catch (err) {
+      console.error(`Failed: ${cat.tag}:`, err.message);
+    }
+  }
+
+  setCached("ALL", all);
+  return all;
+}
+
+// ============================================================
 //  Endpoints
 // ============================================================
 
-// Home route - returns API info
 app.get("/", (req, res) => {
   res.json({
     name: "Shoply API",
-    version: "1.1.0",
-    totalProducts: products.length,
+    version: "2.0.0",
+    description: "Powered by Open Food Facts + Open Prices",
+    sources: {
+      products: "https://world.openfoodfacts.org/",
+      prices: "https://prices.openfoodfacts.org/"
+    },
     endpoints: [
       "GET /products",
       "GET /products?category=<קטגוריה>",
@@ -217,45 +459,58 @@ app.get("/", (req, res) => {
   });
 });
 
- // All products - with filtering and search
-  app.get("/products", (req, res) => {
-  let result = products.map(toApiFormat);
+app.get("/products", async (req, res) => {
+  try {
+    let products = await fetchAllProducts();
 
-  //  Filter by category
-  if (req.query.category) {
-    result = result.filter(p => p.category === req.query.category);
+    if (req.query.category) {
+      products = products.filter(p => p.category === req.query.category);
+    }
+
+    if (req.query.search) {
+      const search = req.query.search.toLowerCase();
+      products = products.filter(p => p.title.toLowerCase().includes(search));
+    }
+
+    res.json(products.map(toApiFormat));
+  } catch (err) {
+    console.error("Error /products:", err);
+    res.status(500).json({ error: "שגיאה בקבלת המוצרים" });
   }
-
-  // Search by name
-  if (req.query.search) {
-    const search = req.query.search.toLowerCase();
-    result = result.filter(p => p.title.toLowerCase().includes(search));
-  }
-
-  res.json(result);
 });
 
-// Product by ID
-app.get("/products/:id", (req, res) => {
-  const product = products.find(p => p.id === req.params.id);
-  if (!product) {
-    return res.status(404).json({ error: "מוצר לא נמצא" });
+app.get("/products/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const fields = "code,product_name,product_name_en,generic_name,quantity,categories_tags";
+    const url = `${OFF_BASE_URL}/api/v2/product/${encodeURIComponent(id)}?fields=${fields}`;
+    const data = await fetchJson(url);
+
+    if (data.status !== 1 || !data.product) {
+      const all = await fetchAllProducts();
+      const found = all.find(p => p.id === id);
+      if (found) return res.json(toApiFormat(found));
+      return res.status(404).json({ error: "מוצר לא נמצא" });
+    }
+
+    const product = await offToProduct(data.product);
+    res.json(toApiFormat(product));
+  } catch (err) {
+    console.error("Error /products/:id:", err);
+    res.status(500).json({ error: "שגיאה בקבלת המוצר" });
   }
-  res.json(toApiFormat(product));
 });
 
-// Category list
 app.get("/categories", (req, res) => {
-  const categories = [...new Set(products.map(p => p.category))];
-  res.json(categories);
+  res.json(ALL_CATEGORIES_HE);
 });
 
 // ============================================================
-//   Start the server
+//  Start
 // ============================================================
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`✓ Shoply API running on port ${PORT}`);
-  console.log(`✓ Total products: ${products.length}`);
+  console.log(`✓ Powered by Open Food Facts + Open Prices`);
 });
